@@ -2,11 +2,14 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+})
 
 export const metadata: Metadata = {
-  title: 'Mortgage Calculator',
-  description: 'Calculate your mortgage payments and view amortization schedule',
+  title: 'Multilingual Mortgage Calculator',
+  description: 'Calculate your monthly mortgage payments in multiple languages',
 }
 
 export default function RootLayout({
@@ -15,8 +18,8 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
-      <body className={inter.className}>{children}</body>
+    <html lang="en" className={inter.className}>
+      <body>{children}</body>
     </html>
   )
 } 
