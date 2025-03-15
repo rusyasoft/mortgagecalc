@@ -1,101 +1,170 @@
-import Image from "next/image";
+'use client';
+
+import { useState } from 'react';
+import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+import { calculateMortgage } from './utils/mortgageCalculator';
+import { translations, Language } from './translations';
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [housePrice, setHousePrice] = useState<number>(500000);
+  const [downPayment, setDownPayment] = useState<number>(100000);
+  const [interestRate, setInterestRate] = useState<number>(5.5);
+  const [amortizationYears, setAmortizationYears] = useState<number>(25);
+  const [monthsToShow, setMonthsToShow] = useState<number>(12);
+  const [language, setLanguage] = useState<Language>('en');
+  const t = translations[language];
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const handleCalculate = () => {
+    const result = calculateMortgage(housePrice, downPayment, interestRate, amortizationYears);
+    return result;
+  };
+
+  const result = handleCalculate();
+  const totalInterest = result.schedule.reduce((sum: number, payment) => sum + payment.interestPayment, 0);
+  const totalPrincipal = result.schedule.reduce((sum: number, payment) => sum + payment.principalPayment, 0);
+
+  const pieData = [
+    { name: t.principal, value: totalPrincipal },
+    { name: t.interest, value: totalInterest },
+  ];
+
+  const COLORS = ['#0088FE', '#FF8042'];
+
+  return (
+    <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">{t.title}</h1>
+          <div className="flex justify-center gap-4 mb-8">
+            <button onClick={() => setLanguage('en')} className={`px-4 py-2 rounded ${language === 'en' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}>English</button>
+            <button onClick={() => setLanguage('ru')} className={`px-4 py-2 rounded ${language === 'ru' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}>Русский</button>
+            <button onClick={() => setLanguage('ko')} className={`px-4 py-2 rounded ${language === 'ko' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}>한국어</button>
+            <button onClick={() => setLanguage('uz')} className={`px-4 py-2 rounded ${language === 'uz' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}>O&apos;zbekcha</button>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+        <div className="bg-white shadow rounded-lg p-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t.housePrice}</label>
+              <input
+                type="number"
+                value={housePrice}
+                onChange={(e) => setHousePrice(Number(e.target.value))}
+                className="w-full p-2 border rounded"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t.downPayment}</label>
+              <input
+                type="number"
+                value={downPayment}
+                onChange={(e) => setDownPayment(Number(e.target.value))}
+                className="w-full p-2 border rounded"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t.interestRate}</label>
+              <input
+                type="number"
+                step="0.1"
+                value={interestRate}
+                onChange={(e) => setInterestRate(Number(e.target.value))}
+                className="w-full p-2 border rounded"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t.amortizationPeriod}</label>
+              <select
+                value={amortizationYears}
+                onChange={(e) => setAmortizationYears(Number(e.target.value))}
+                className="w-full p-2 border rounded"
+              >
+                {[5, 10, 15, 20, 25, 30].map((years) => (
+                  <option key={years} value={years}>{years} {t.years}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white shadow rounded-lg p-6 mb-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">{t.results}</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div>
+              <p className="text-lg mb-4">
+                {t.monthlyPayment}: <span className="font-bold">${result.monthlyPayment.toFixed(2)}</span>
+              </p>
+              <p className="text-lg mb-4">
+                {t.totalInterest}: <span className="font-bold">${totalInterest.toFixed(2)}</span>
+              </p>
+              <p className="text-lg mb-4">
+                {t.totalAmount}: <span className="font-bold">${(totalPrincipal + totalInterest).toFixed(2)}</span>
+              </p>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t.showMonths}</label>
+                <select
+                  value={monthsToShow}
+                  onChange={(e) => setMonthsToShow(Number(e.target.value))}
+                  className="w-full p-2 border rounded"
+                >
+                  {[12, 24, 36, 48, 60].map((months) => (
+                    <option key={months} value={months}>{months} {t.months}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={pieData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                    label={({ name, value }) => `${name}: $${value.toFixed(2)}`}
+                  >
+                    {pieData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white shadow rounded-lg p-6">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">{t.amortizationSchedule}</h2>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t.month}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t.payment}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t.principal}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t.interest}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t.remainingBalance}</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {result.schedule.slice(0, monthsToShow).map((payment, index) => (
+                  <tr key={index} className={index % 2 === 0 ? 'bg-gray-50' : ''}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{index + 1}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${payment.monthlyPayment.toFixed(2)}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${payment.principalPayment.toFixed(2)}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${payment.interestPayment.toFixed(2)}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${payment.remainingBalance.toFixed(2)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

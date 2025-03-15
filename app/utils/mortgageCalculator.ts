@@ -6,11 +6,15 @@ export type MortgageInput = {
 };
 
 export type MonthlyPaymentBreakdown = {
-  payment: number;
-  principal: number;
-  interest: number;
+  monthlyPayment: number;
+  principalPayment: number;
+  interestPayment: number;
   remainingBalance: number;
-  month: number;
+};
+
+export type MortgageCalculationResult = {
+  monthlyPayment: number;
+  schedule: MonthlyPaymentBreakdown[];
 };
 
 export const calculateMonthlyPayment = (input: MortgageInput): number => {
@@ -26,9 +30,9 @@ export const calculateMonthlyPayment = (input: MortgageInput): number => {
 };
 
 export const calculateAmortizationSchedule = (
-  input: MortgageInput
+  input: MortgageInput,
+  monthlyPayment: number
 ): MonthlyPaymentBreakdown[] => {
-  const monthlyPayment = calculateMonthlyPayment(input);
   const monthlyRate = input.interestRate / 100 / 12;
   const numberOfPayments = input.amortizationYears * 12;
   const initialBalance = input.housePrice - input.downPayment;
@@ -41,13 +45,34 @@ export const calculateAmortizationSchedule = (
     remainingBalance = remainingBalance - principalPayment;
 
     schedule.push({
-      month,
-      payment: Math.round(monthlyPayment * 100) / 100,
-      principal: Math.round(principalPayment * 100) / 100,
-      interest: Math.round(interestPayment * 100) / 100,
+      monthlyPayment: Math.round(monthlyPayment * 100) / 100,
+      principalPayment: Math.round(principalPayment * 100) / 100,
+      interestPayment: Math.round(interestPayment * 100) / 100,
       remainingBalance: Math.max(0, Math.round(remainingBalance * 100) / 100),
     });
   }
 
   return schedule;
+};
+
+export const calculateMortgage = (
+  housePrice: number,
+  downPayment: number,
+  interestRate: number,
+  amortizationYears: number
+): MortgageCalculationResult => {
+  const input: MortgageInput = {
+    housePrice,
+    downPayment,
+    interestRate,
+    amortizationYears,
+  };
+
+  const monthlyPayment = calculateMonthlyPayment(input);
+  const schedule = calculateAmortizationSchedule(input, monthlyPayment);
+
+  return {
+    monthlyPayment,
+    schedule,
+  };
 }; 
